@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { setSchema } from "@/lib/validation";
+import { lbsToKg } from "@/lib/utils";
 
 export async function registrarSet(formData: FormData) {
   const parsed = setSchema.parse({
@@ -13,10 +14,12 @@ export async function registrarSet(formData: FormData) {
     performedAt: formData.get("performedAt") || undefined,
     notes: formData.get("notes") || null,
   });
+  const unit = formData.get("unit") === "lbs" ? "lbs" : "kg";
+  const weightKg = unit === "lbs" ? lbsToKg(parsed.weight) : parsed.weight;
   await prisma.workoutSet.create({
     data: {
       exerciseId: parsed.exerciseId,
-      weight: parsed.weight,
+      weight: weightKg,
       reps: parsed.reps,
       sets: parsed.sets,
       performedAt: parsed.performedAt,

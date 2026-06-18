@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { Card } from "@/components/ui";
 import { prisma } from "@/lib/db";
 import { MUSCLE_LABEL, MUSCLE_SLUG, MUSCLE_COLOR } from "@/lib/muscle-groups";
+import { kgToLbs } from "@/lib/utils";
 import { SetForm } from "./set-form";
 import { DeleteSetButton } from "./delete-set-button";
 import { ProgressChart } from "./progress-chart";
@@ -50,6 +51,7 @@ export default async function EjercicioPage({ params }: { params: Promise<{ id: 
           <Card className="py-3 px-4">
             <div className="text-xs text-[var(--muted-foreground)]">PR actual</div>
             <div className="text-2xl font-bold">{max} kg</div>
+            <div className="text-xs text-[var(--muted-foreground)]">{kgToLbs(max)} lbs</div>
           </Card>
         )}
       </div>
@@ -78,7 +80,8 @@ export default async function EjercicioPage({ params }: { params: Promise<{ id: 
               <thead className="text-left text-[var(--muted-foreground)]">
                 <tr>
                   <th className="py-2 font-medium">Fecha</th>
-                  <th className="font-medium">Peso</th>
+                  <th className="font-medium">Peso (kg)</th>
+                  <th className="font-medium">Peso (lbs)</th>
                   <th className="font-medium">Reps</th>
                   <th className="font-medium">Series</th>
                   <th></th>
@@ -90,7 +93,8 @@ export default async function EjercicioPage({ params }: { params: Promise<{ id: 
                     <td className="py-2">
                       {format(s.performedAt, "d MMM yyyy", { locale: es })}
                     </td>
-                    <td className="font-medium">{s.weight} kg</td>
+                    <td className="font-medium">{s.weight}</td>
+                    <td className="font-medium">{kgToLbs(s.weight)}</td>
                     <td>{s.reps}</td>
                     <td>{s.sets}</td>
                     <td className="text-right">
