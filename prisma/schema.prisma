@@ -16,15 +16,28 @@ enum MuscleGroup {
   PIERNAS
 }
 
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  name         String
+  age          Int
+  createdAt    DateTime     @default(now())
+  exercises    Exercise[]
+  routine      RoutineDay[]
+}
+
 model Exercise {
   id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   name        String
   muscleGroup MuscleGroup
   notes       String?
   createdAt   DateTime     @default(now())
   sets        WorkoutSet[]
 
-  @@index([muscleGroup])
+  @@index([userId, muscleGroup])
 }
 
 model WorkoutSet {
@@ -41,7 +54,11 @@ model WorkoutSet {
 }
 
 model RoutineDay {
-  dayOfWeek    Int           @id
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dayOfWeek    Int
   muscleGroups MuscleGroup[]
   updatedAt    DateTime      @updatedAt
+
+  @@id([userId, dayOfWeek])
 }

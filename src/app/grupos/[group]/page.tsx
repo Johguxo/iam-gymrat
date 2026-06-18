@@ -5,16 +5,18 @@ import { Card } from "@/components/ui";
 import { ExerciseForm } from "./exercise-form";
 import { SLUG_TO_MUSCLE, MUSCLE_LABEL, MUSCLE_COLOR } from "@/lib/muscle-groups";
 import { prisma } from "@/lib/db";
+import { requireUserId } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function GrupoPage({ params }: { params: Promise<{ group: string }> }) {
+  const userId = await requireUserId();
   const { group } = await params;
   const muscle = SLUG_TO_MUSCLE[group];
   if (!muscle) notFound();
 
   const exercises = await prisma.exercise.findMany({
-    where: { muscleGroup: muscle },
+    where: { userId, muscleGroup: muscle },
     orderBy: { createdAt: "desc" },
     include: {
       sets: { orderBy: { performedAt: "desc" }, take: 1 },

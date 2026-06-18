@@ -2,11 +2,16 @@ import { Card } from "@/components/ui";
 import { prisma } from "@/lib/db";
 import { DAYS_ES } from "@/lib/muscle-groups";
 import { RoutineEditor } from "./routine-editor";
+import { requireUserId } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function RutinaPage() {
-  const rows = await prisma.routineDay.findMany({ orderBy: { dayOfWeek: "asc" } });
+  const userId = await requireUserId();
+  const rows = await prisma.routineDay.findMany({
+    where: { userId },
+    orderBy: { dayOfWeek: "asc" },
+  });
   const byDay = new Map(rows.map((r) => [r.dayOfWeek, r.muscleGroups]));
 
   return (

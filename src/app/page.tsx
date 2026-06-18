@@ -5,13 +5,16 @@ import { prisma } from "@/lib/db";
 import { MUSCLE_LABEL } from "@/lib/muscle-groups";
 import { TodayRoutine } from "./today-routine";
 import { RecentDate } from "./recent-date";
+import { requireUserId } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  const userId = await requireUserId();
   const [routineRows, recent] = await Promise.all([
-    prisma.routineDay.findMany(),
+    prisma.routineDay.findMany({ where: { userId } }),
     prisma.workoutSet.findMany({
+      where: { exercise: { userId } },
       take: 5,
       orderBy: { performedAt: "desc" },
       include: { exercise: true },

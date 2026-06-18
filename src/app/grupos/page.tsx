@@ -2,12 +2,15 @@ import Link from "next/link";
 import { Card } from "@/components/ui";
 import { MUSCLE_GROUPS, MUSCLE_LABEL, MUSCLE_SLUG, MUSCLE_COLOR } from "@/lib/muscle-groups";
 import { prisma } from "@/lib/db";
+import { requireUserId } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function GruposPage() {
+  const userId = await requireUserId();
   const counts = await prisma.exercise.groupBy({
     by: ["muscleGroup"],
+    where: { userId },
     _count: { _all: true },
   });
   const countMap = new Map(counts.map((c) => [c.muscleGroup, c._count._all]));

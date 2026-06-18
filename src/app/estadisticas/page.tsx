@@ -4,11 +4,14 @@ import { Card } from "@/components/ui";
 import { prisma } from "@/lib/db";
 import { MUSCLE_GROUPS, MUSCLE_LABEL, MUSCLE_COLOR } from "@/lib/muscle-groups";
 import { VolumeChart } from "./volume-chart";
+import { requireUserId } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function EstadisticasPage() {
+  const userId = await requireUserId();
   const sets = await prisma.workoutSet.findMany({
+    where: { exercise: { userId } },
     include: { exercise: true },
     orderBy: { performedAt: "asc" },
   });

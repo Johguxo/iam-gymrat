@@ -18,6 +18,7 @@ Pecho, Bíceps, Tríceps, Espalda, Hombros, Piernas.
 
 ```bash
 DATABASE_URL="postgresql://...la-url-de-railway..."
+AUTH_SECRET="generala-con: openssl rand -base64 32"
 ```
 
 ### 2. Migrar y arrancar
@@ -25,9 +26,11 @@ DATABASE_URL="postgresql://...la-url-de-railway..."
 ```bash
 npm install
 npm run db:migrate -- --name init   # crea las tablas en Railway
-npm run db:seed                     # inicializa los 7 días de la rutina
 npm run dev
 ```
+
+Abre `/registro` para crear tu cuenta (correo, contraseña, nombre, edad).
+Los 7 días de la rutina se inicializan vacíos al registrarte.
 
 Abre [http://localhost:3000](http://localhost:3000).
 

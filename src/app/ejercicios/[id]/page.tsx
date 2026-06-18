@@ -10,13 +10,15 @@ import { kgToLbs } from "@/lib/utils";
 import { SetForm } from "./set-form";
 import { DeleteSetButton } from "./delete-set-button";
 import { ProgressChart } from "./progress-chart";
+import { requireUserId } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function EjercicioPage({ params }: { params: Promise<{ id: string }> }) {
+  const userId = await requireUserId();
   const { id } = await params;
-  const exercise = await prisma.exercise.findUnique({
-    where: { id },
+  const exercise = await prisma.exercise.findFirst({
+    where: { id, userId },
     include: { sets: { orderBy: { performedAt: "desc" } } },
   });
   if (!exercise) notFound();

@@ -1,22 +1,3 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
-async function main() {
-  for (let day = 0; day < 7; day++) {
-    await prisma.routineDay.upsert({
-      where: { dayOfWeek: day },
-      update: {},
-      create: { dayOfWeek: day, muscleGroups: [] },
-    });
-  }
-  console.log("Seeded routine days 0-6");
-}
-
-main()
-  .then(() => prisma.$disconnect())
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+// La rutina semanal se inicializa automáticamente al registrar un usuario nuevo
+// (ver src/app/registro/actions.ts), así que no hay datos globales que sembrar.
+console.log("No global seed data — routine days are created per-user on signup.");
