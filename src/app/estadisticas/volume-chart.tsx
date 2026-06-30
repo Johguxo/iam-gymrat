@@ -26,7 +26,7 @@ export function VolumeChart({ data }: { data: { semana: string; volumen: number 
               fontSize: 12,
             }}
           />
-          <Bar dataKey="volumen" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
+          <Bar dataKey="volumen" fill="var(--primary)" radius={[6, 6, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

@@ -1,6 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 
-export const PUBLIC_PATHS = ["/login", "/registro"];
+export const PUBLIC_PATHS = ["/login", "/registro", "/olvide-contrasena"];
 
 export default {
   providers: [],

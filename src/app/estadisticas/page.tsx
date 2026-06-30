@@ -1,8 +1,9 @@
 import { format, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
+import { Trophy } from "lucide-react";
 import { Card } from "@/components/ui";
 import { prisma } from "@/lib/db";
-import { MUSCLE_GROUPS, MUSCLE_LABEL, MUSCLE_COLOR } from "@/lib/muscle-groups";
+import { MUSCLE_GROUPS, MUSCLE_LABEL } from "@/lib/muscle-groups";
 import { VolumeChart } from "./volume-chart";
 import { requireUserId } from "@/auth";
 
@@ -16,11 +17,15 @@ export default async function EstadisticasPage() {
     orderBy: { performedAt: "asc" },
   });
 
-  const prByGroup = new Map<string, { exercise: string; weight: number }>();
+  const prByGroup = new Map<string, { exercise: string; weight: number; reps: number }>();
   for (const s of sets) {
     const cur = prByGroup.get(s.exercise.muscleGroup);
     if (!cur || s.weight > cur.weight) {
-      prByGroup.set(s.exercise.muscleGroup, { exercise: s.exercise.name, weight: s.weight });
+      prByGroup.set(s.exercise.muscleGroup, {
+        exercise: s.exercise.name,
+        weight: s.weight,
+        reps: s.reps,
+      });
     }
   }
 
@@ -35,55 +40,81 @@ export default async function EstadisticasPage() {
   const totalVolume = sets.reduce((acc, s) => acc + s.weight * s.reps * s.sets, 0);
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-1">Estadísticas</h1>
-      <p className="text-[var(--muted-foreground)] mb-6">Tu progreso general.</p>
+    <div className="max-w-md mx-auto">
+      <header className="mb-5">
+        <h1 className="text-[26px] font-semibold tracking-tight">Estadísticas</h1>
+        <p className="text-sm text-[var(--muted-foreground)] mt-0.5">Tu progreso general.</p>
+      </header>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <Card>
-          <div className="text-xs text-[var(--muted-foreground)]">Sets registrados</div>
-          <div className="text-2xl font-bold">{totalSets}</div>
-        </Card>
-        <Card>
-          <div className="text-xs text-[var(--muted-foreground)]">Volumen total (kg)</div>
-          <div className="text-2xl font-bold">{Math.round(totalVolume).toLocaleString("es")}</div>
-        </Card>
-        <Card>
-          <div className="text-xs text-[var(--muted-foreground)]">Grupos activos</div>
-          <div className="text-2xl font-bold">{prByGroup.size} / 6</div>
-        </Card>
+      <div className="grid grid-cols-2 gap-3 mb-3.5">
+        <StatCard label="Sets registrados" value={totalSets.toLocaleString("es")} />
+        <StatCard label="Volumen total" value={Math.round(totalVolume).toLocaleString("es")} unit="kg" />
+        <StatCard label="Grupos activos" value={`${prByGroup.size}`} unit="/6" />
+        <StatCard label="Promedio set" value={totalSets ? Math.round(totalVolume / totalSets).toLocaleString("es") : "0"} unit="kg" />
       </div>
 
-      <Card className="mb-6">
-        <h2 className="font-semibold mb-3">Récords por grupo</h2>
-        <div className="grid sm:grid-cols-2 gap-3">
-          {MUSCLE_GROUPS.map((g) => {
+      {volumeData.length >= 2 && (
+        <Card className="mb-3.5">
+          <h2 className="text-[11px] font-semibold tracking-[0.14em] text-[var(--muted-foreground)] mb-3">
+            VOLUMEN SEMANAL
+          </h2>
+          <VolumeChart data={volumeData} />
+        </Card>
+      )}
+
+      <Card>
+        <h2 className="text-[11px] font-semibold tracking-[0.14em] text-[var(--muted-foreground)] mb-3">
+          RÉCORDS POR GRUPO
+        </h2>
+        <div className="flex flex-col">
+          {MUSCLE_GROUPS.map((g, i) => {
             const pr = prByGroup.get(g);
             return (
-              <div key={g} className="flex items-center justify-between gap-3 py-2 border-b border-[var(--border)] last:border-0">
-                <span className={`rounded-full px-2.5 py-0.5 text-xs border ${MUSCLE_COLOR[g]}`}>
-                  {MUSCLE_LABEL[g]}
+              <div
+                key={g}
+                className={`flex items-center gap-3 py-3 ${
+                  i < MUSCLE_GROUPS.length - 1 ? "border-b border-[var(--border)]" : ""
+                }`}
+              >
+                <span className="w-8 h-8 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center">
+                  <Trophy className="w-4 h-4" />
                 </span>
+                <span className="flex-1 font-semibold text-[14px]">{MUSCLE_LABEL[g]}</span>
                 {pr ? (
-                  <span className="text-sm">
-                    <span className="font-bold">{pr.weight} kg</span>{" "}
-                    <span className="text-[var(--muted-foreground)]">· {pr.exercise}</span>
-                  </span>
+                  <div className="text-right">
+                    <div className="font-mono font-semibold text-[15px] tabular-nums">
+                      {pr.weight} kg × {pr.reps}
+                    </div>
+                    <div className="text-xs font-medium text-[var(--muted-foreground)] truncate max-w-[160px]">
+                      {pr.exercise}
+                    </div>
+                  </div>
                 ) : (
-                  <span className="text-sm text-[var(--muted-foreground)]">sin registro</span>
+                  <span className="text-xs font-medium text-[var(--muted-foreground)]">
+                    sin registro
+                  </span>
                 )}
               </div>
             );
           })}
         </div>
       </Card>
-
-      {volumeData.length >= 2 && (
-        <Card>
-          <h2 className="font-semibold mb-3">Volumen semanal</h2>
-          <VolumeChart data={volumeData} />
-        </Card>
-      )}
     </div>
+  );
+}
+
+function StatCard({ label, value, unit }: { label: string; value: string; unit?: string }) {
+  return (
+    <Card className="p-4">
+      <div className="text-xs font-medium text-[var(--muted-foreground)]">{label}</div>
+      <div className="mt-1.5 font-mono font-semibold text-[26px] tracking-tight tabular-nums">
+        {value}
+        {unit && (
+          <span className="text-sm font-medium text-[var(--muted-foreground)] font-sans ml-1">
+            {unit}
+          </span>
+        )}
+      </div>
+    </Card>
   );
 }

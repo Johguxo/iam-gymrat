@@ -18,18 +18,18 @@ export function ExerciseForm({ muscleGroup }: { muscleGroup: MuscleGroup }) {
           formRef.current?.reset();
         })
       }
-      className="grid gap-3 sm:grid-cols-[1fr_auto]"
+      className="grid gap-3"
     >
       <input type="hidden" name="muscleGroup" value={muscleGroup} />
       <div>
-        <Label htmlFor="name">Nombre del ejercicio</Label>
+        <Label htmlFor="name" className="sr-only">
+          Nombre del ejercicio
+        </Label>
         <Input id="name" name="name" placeholder="Ej: Press banca" required />
       </div>
-      <div className="flex items-end">
-        <Button type="submit" disabled={pending}>
-          {pending ? "Añadiendo..." : "Añadir"}
-        </Button>
-      </div>
+      <Button type="submit" disabled={pending} className="w-full">
+        {pending ? "Añadiendo..." : "Añadir ejercicio"}
+      </Button>
     </form>
   );
 }

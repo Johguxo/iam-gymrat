@@ -1,62 +1,44 @@
-import Link from "next/link";
 import { MuscleGroup } from "@prisma/client";
-import { Card } from "@/components/ui";
 import { prisma } from "@/lib/db";
-import { MUSCLE_LABEL } from "@/lib/muscle-groups";
-import { TodayRoutine } from "./today-routine";
-import { RecentDate } from "./recent-date";
+import { HomeView } from "./home-view";
 import { requireUserId } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const userId = await requireUserId();
-  const [routineRows, recent] = await Promise.all([
+  const since = new Date();
+  since.setDate(since.getDate() - 60);
+
+  const [user, routineRows, exercises, recentSets] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { name: true } }),
     prisma.routineDay.findMany({ where: { userId } }),
+    prisma.exercise.findMany({ where: { userId }, select: { muscleGroup: true } }),
     prisma.workoutSet.findMany({
-      where: { exercise: { userId } },
-      take: 5,
+      where: { exercise: { userId }, performedAt: { gte: since } },
+      select: { performedAt: true },
       orderBy: { performedAt: "desc" },
-      include: { exercise: true },
     }),
   ]);
 
   const routineByDay: Record<number, MuscleGroup[]> = {};
   for (const r of routineRows) routineByDay[r.dayOfWeek] = r.muscleGroups;
 
-  return (
-    <div>
-      <TodayRoutine routineByDay={routineByDay} />
+  const exercisesByGroup: Record<string, number> = {};
+  for (const e of exercises) {
+    exercisesByGroup[e.muscleGroup] = (exercisesByGroup[e.muscleGroup] ?? 0) + 1;
+  }
 
-      <Card>
-        <h2 className="font-semibold mb-3">Últimos registros</h2>
-        {recent.length === 0 ? (
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Aún no has registrado ningún set. Ve a{" "}
-            <Link href="/grupos" className="underline">
-              Grupos
-            </Link>{" "}
-            para empezar.
-          </p>
-        ) : (
-          <ul className="divide-y divide-[var(--border)]">
-            {recent.map((s) => (
-              <li key={s.id} className="py-2 flex items-center justify-between">
-                <Link href={`/ejercicios/${s.exerciseId}`} className="hover:underline">
-                  <div className="font-medium">{s.exercise.name}</div>
-                  <div className="text-xs text-[var(--muted-foreground)]">
-                    {MUSCLE_LABEL[s.exercise.muscleGroup]} ·{" "}
-                    <RecentDate iso={s.performedAt.toISOString()} />
-                  </div>
-                </Link>
-                <div className="text-sm font-medium">
-                  {s.weight}kg × {s.reps} × {s.sets}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
-    </div>
+  const workoutDays = Array.from(
+    new Set(recentSets.map((s) => s.performedAt.toISOString().slice(0, 10))),
+  );
+
+  return (
+    <HomeView
+      name={user?.name ?? null}
+      routineByDay={routineByDay}
+      exercisesByGroup={exercisesByGroup}
+      workoutDays={workoutDays}
+    />
   );
 }

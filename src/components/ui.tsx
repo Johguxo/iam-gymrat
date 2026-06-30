@@ -5,7 +5,7 @@ export function Card({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm",
+        "rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5",
         className,
       )}
       {...props}
@@ -17,18 +17,22 @@ export function Button({
   className,
   variant = "primary",
   ...props
-}: ComponentProps<"button"> & { variant?: "primary" | "ghost" | "outline" | "danger" }) {
+}: ComponentProps<"button"> & {
+  variant?: "primary" | "ghost" | "outline" | "danger" | "accent" | "inverse";
+}) {
   const variants = {
     primary:
       "bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90",
     ghost: "hover:bg-[var(--muted)]",
-    outline: "border border-[var(--border)] hover:bg-[var(--muted)]",
+    outline: "border border-[var(--border-strong)] bg-[var(--card)] hover:bg-[var(--muted)]",
     danger: "bg-rose-600 text-white hover:bg-rose-700",
+    accent: "bg-[var(--accent)] text-white hover:opacity-90",
+    inverse: "bg-white text-[#1C1C1E] hover:opacity-90",
   };
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium px-4 py-2 transition disabled:opacity-50 disabled:pointer-events-none cursor-pointer",
+        "inline-flex items-center justify-center gap-2 rounded-2xl text-sm font-semibold px-5 py-3 transition disabled:opacity-50 disabled:pointer-events-none cursor-pointer",
         variants[variant],
         className,
       )}
@@ -41,7 +45,7 @@ export function Input({ className, ...props }: ComponentProps<"input">) {
   return (
     <input
       className={cn(
-        "w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--primary)]/20",
+        "w-full rounded-xl border border-[var(--border-strong)] bg-[var(--card)] px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--primary)]/15",
         className,
       )}
       {...props}

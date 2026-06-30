@@ -11,7 +11,12 @@ export default function LoginPage() {
           Entra a tu cuenta para registrar tu progreso.
         </p>
         <LoginForm />
-        <p className="text-sm text-[var(--muted-foreground)] mt-5 text-center">
+        <p className="text-sm text-[var(--muted-foreground)] mt-3 text-center">
+          <Link href="/olvide-contrasena" className="underline">
+            Olvidé mi contraseña
+          </Link>
+        </p>
+        <p className="text-sm text-[var(--muted-foreground)] mt-2 text-center">
           ¿No tienes cuenta?{" "}
           <Link href="/registro" className="underline">
             Regístrate
